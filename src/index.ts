@@ -9,7 +9,7 @@ const server = createServer((_req, res) => {
 	res.end()
 })
 
-IO(server).on('connect', socket => new User(socket))
+IO(server).on('connect', io => new User(io))
 
 server.listen(port, () => {
 	console.log(`Listening on http://localhost:${port}`)
