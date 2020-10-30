@@ -4,7 +4,7 @@ import generateName from '../generateName'
 import UserJson from './UserJson'
 import Coordinate from './Coordinate'
 import Line, { lines } from './Line'
-import Message, { messages } from './Message'
+import Message, { UserMessage, JoinMessage, messages } from './Message'
 
 let users: User[] = []
 
@@ -21,6 +21,7 @@ export default class User {
 		this.emitOtherUsers()
 		this.emitLines()
 		this.emitMessages()
+		this.emitJoinMessage()
 		
 		io.on('name', (name: string) => {
 			this.name = name
@@ -37,7 +38,8 @@ export default class User {
 		})
 		
 		io.on('message', (body: string) => {
-			const message: Message = {
+			const message: UserMessage = {
+				type: 'user',
 				name: this.name,
 				color: this.color,
 				body
@@ -112,5 +114,17 @@ export default class User {
 	
 	private emitMessage = (message: Message) => {
 		this.io.emit('message', message)
+	}
+	
+	private emitJoinMessage = () => {
+		const message: JoinMessage = {
+			type: 'join',
+			name: this.name
+		}
+		
+		messages.push(message)
+		
+		for (const user of this.otherUsers)
+			user.emitMessage(message)
 	}
 }
