@@ -4,7 +4,7 @@ import generateName from '../generateName'
 import UserJson from './UserJson'
 import Coordinate from './Coordinate'
 import Line, { lines } from './Line'
-import Message, { UserMessage, JoinMessage, messages } from './Message'
+import Message, { UserMessage, JoinMessage, LeaveMessage, messages } from './Message'
 
 let users: User[] = []
 
@@ -66,8 +66,17 @@ export default class User {
 		})
 		
 		io.on('disconnect', () => {
-			for (const user of users = this.otherUsers)
+			const message: LeaveMessage = {
+				type: 'leave',
+				name: this.name
+			}
+			
+			messages.push(message)
+			
+			for (const user of users = this.otherUsers) {
 				user.emitOtherUsers()
+				user.emitMessage(message)
+			}
 		})
 	}
 	

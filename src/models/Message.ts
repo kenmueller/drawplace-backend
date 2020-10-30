@@ -10,7 +10,12 @@ export interface JoinMessage {
 	name: string
 }
 
-type Message = UserMessage | JoinMessage
+export interface LeaveMessage {
+	type: 'leave'
+	name: string
+}
+
+type Message = UserMessage | JoinMessage | LeaveMessage
 
 export default Message
 
