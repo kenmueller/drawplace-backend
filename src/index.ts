@@ -3,6 +3,7 @@ import IO from 'socket.io'
 
 import User from './models/User'
 
+const port = process.env.PORT ?? 5000
 const server = createServer((_req, res) => {
 	res.writeHead(301, { Location: 'https://draw.place' })
 	res.end()
@@ -10,7 +11,6 @@ const server = createServer((_req, res) => {
 
 IO(server).on('connect', socket => new User(socket))
 
-;(async () => {
-	const port = process.env.PORT ?? 5000
-	server.listen(port, () => console.log(`Listening on http://localhost:${port}`))
-})()
+server.listen(port, () => {
+	console.log(`Listening on http://localhost:${port}`)
+})
