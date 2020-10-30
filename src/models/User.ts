@@ -5,14 +5,15 @@ import UserJson from './UserJson'
 import Coordinate from './Coordinate'
 import Line, { lines } from './Line'
 import Message, { UserMessage, JoinMessage, LeaveMessage, messages } from './Message'
+import { v4 as uuid } from 'uuid'
 
 let users: User[] = []
 
 export default class User {
+	private id: string = uuid()
 	private cursor?: Coordinate
 	private name: string = generateName()
 	private color: string = '#000000'
-	private message?: string
 	
 	constructor(private io: Socket) {
 		users.push(this)
@@ -83,10 +84,10 @@ export default class User {
 	private get json(): UserJson | null {
 		return this.cursor
 			? {
+				id: this.id,
 				cursor: this.cursor,
 				name: this.name,
-				color: this.color,
-				message: this.message ?? null
+				color: this.color
 			}
 			: null
 	}
