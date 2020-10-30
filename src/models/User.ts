@@ -1,11 +1,11 @@
 import { Socket } from 'socket.io'
-import generateName from '../generateName'
+import { v4 as uuid } from 'uuid'
 
 import UserJson from './UserJson'
 import Coordinate from './Coordinate'
 import Line, { lines } from './Line'
 import Message, { UserMessage, JoinMessage, LeaveMessage, messages } from './Message'
-import { v4 as uuid } from 'uuid'
+import generateName from '../generateName'
 
 let users: User[] = []
 
