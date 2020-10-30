@@ -19,7 +19,10 @@ export default class User {
 				user.emitOtherCursors()
 		})
 		
-		socket.on('disconnect', () => users = this.otherUsers)
+		socket.on('disconnect', () => {
+			for (const user of users = this.otherUsers)
+				user.emitOtherCursors()
+		})
 	}
 	
 	private get otherUsers() {
