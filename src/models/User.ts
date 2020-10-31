@@ -4,18 +4,21 @@ import { v4 as uuid } from 'uuid'
 import UserJson from './UserJson'
 import Coordinate from './Coordinate'
 import Line, { lines } from './Line'
-import Message, { UserMessage, JoinMessage, LeaveMessage, messages } from './Message'
-import generateName from '../generateName'
+import Message, { UserMessage, JoinMessage, LeaveMessage, addMessage, getMessages } from './Message'
+import generateName from '../utils/generateName'
+import removeElement from '../utils/removeElement'
 
-let users: User[] = []
+const users: User[] = []
 
 export default class User {
 	private id: string = uuid()
 	private cursor?: Coordinate
 	private name: string = generateName()
 	private color: string = '#000000'
+	private otherUsers: User[]
 	
 	constructor(private io: Socket) {
+		this.otherUsers = [...users]
 		users.push(this)
 		
 		this.emitName()
@@ -46,7 +49,7 @@ export default class User {
 				body
 			}
 			
-			messages.push(message)
+			addMessage(message)
 			
 			for (const user of this.otherUsers)
 				user.emitMessage(message)
@@ -72,9 +75,11 @@ export default class User {
 				name: this.name
 			}
 			
-			messages.push(message)
+			addMessage(message)
 			
-			for (const user of users = this.otherUsers) {
+			for (const user of removeElement(users, this)) {
+				removeElement(user.otherUsers, this)
+				
 				user.emitOtherUsers()
 				user.emitMessage(message)
 			}
@@ -90,10 +95,6 @@ export default class User {
 				color: this.color
 			}
 			: null
-	}
-	
-	private get otherUsers() {
-		return users.filter(user => user !== this)
 	}
 	
 	private get jsonOtherUsers() {
@@ -118,8 +119,8 @@ export default class User {
 		this.io.emit('line', line)
 	}
 	
-	private emitMessages = () => {
-		this.io.emit('messages', messages)
+	private emitMessages = async () => {
+		this.io.emit('messages', await getMessages())
 	}
 	
 	private emitMessage = (message: Message) => {
@@ -132,7 +133,7 @@ export default class User {
 			name: this.name
 		}
 		
-		messages.push(message)
+		addMessage(message)
 		
 		for (const user of this.otherUsers)
 			user.emitMessage(message)
