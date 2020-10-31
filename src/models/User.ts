@@ -2,7 +2,7 @@ import { Socket } from 'socket.io'
 import { v4 as uuid } from 'uuid'
 
 import UserJson from './UserJson'
-import Coordinate, { getChunkIdForCoordinate } from './Coordinate'
+import Coordinate, { getChunkIdForCoordinate, areCoordinatesInOrder } from './Coordinate'
 import { getChunk } from './Chunk'
 import Bounds from './Bounds'
 import Line, { addLine, getChunkIdForLine } from './Line'
@@ -16,15 +16,16 @@ export default class User {
 	private cursor?: Coordinate
 	private name: string = generateName()
 	private color: string = '#000000'
+	private bounds?: Bounds
 	private chunks: Set<string> = new Set() // Chunk IDs
 	private otherUsers: Set<User>
+	private hasEmittedOtherUsers: boolean = false
 	
 	constructor(private io: Socket) {
 		this.otherUsers = new Set(users)
 		users.add(this)
 		
 		this.emitName()
-		this.emitOtherUsers()
 		this.emitMessages()
 		this.emitJoinMessage()
 		
@@ -64,7 +65,10 @@ export default class User {
 		})
 		
 		io.on('bounds', (bounds: Bounds) => {
+			this.bounds = bounds
 			
+			if (!this.hasEmittedOtherUsers)
+				this.emitOtherUsers()
 		})
 		
 		io.on('line', (line: Line) => {
@@ -93,23 +97,25 @@ export default class User {
 		})
 	}
 	
-	private get json(): UserJson | null {
-		return this.cursor
-			? {
-				id: this.id,
-				cursor: this.cursor,
-				name: this.name,
-				color: this.color
-			}
-			: null
-	}
-	
 	private get jsonOtherUsers() {
+		if (!this.bounds)
+			return null
+		
 		const users: UserJson[] = []
 		
-		for (const { json } of this.otherUsers)
-			if (json)
-				users.push(json)
+		for (const user of this.otherUsers) {
+			if (!(user.cursor && areCoordinatesInOrder(this.bounds.lower, user.cursor, this.bounds.upper)))
+				continue
+			
+			const json: UserJson = {
+				id: user.id,
+				cursor: user.cursor,
+				name: user.name,
+				color: user.color
+			}
+			
+			users.push(json)
+		}
 		
 		return users
 	}
@@ -119,7 +125,13 @@ export default class User {
 	}
 	
 	private emitOtherUsers = () => {
-		this.io.emit('users', this.jsonOtherUsers)
+		const { jsonOtherUsers } = this
+		
+		if (!jsonOtherUsers)
+			return
+		
+		this.hasEmittedOtherUsers = true
+		this.io.emit('users', jsonOtherUsers)
 	}
 	
 	private addChunksIfNeeded = async () => {
@@ -132,7 +144,7 @@ export default class User {
 			return // Already loaded chunk
 		
 		this.chunks.add(chunkId)
-		this.io.emit('add-chunk', await getChunk(this.cursor))
+		this.io.emit('chunk', await getChunk(this.cursor))
 	}
 	
 	private emitLine = (chunkId: string, line: Line) => {

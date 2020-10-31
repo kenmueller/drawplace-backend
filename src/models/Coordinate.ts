@@ -7,3 +7,6 @@ export default interface Coordinate {
 
 export const getChunkIdForCoordinate = ({ x, y }: Coordinate) =>
 	`${Math.floor(x / CHUNK_DIMENSION)}x${Math.floor(y / CHUNK_DIMENSION)}`
+
+export const areCoordinatesInOrder = (a: Coordinate, b: Coordinate, c: Coordinate) =>
+	a.x <= b.x && b.x <= c.x && a.y <= b.y && b.y <= c.y
