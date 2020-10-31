@@ -3,16 +3,15 @@ import { createServer } from 'http'
 import IO from 'socket.io'
 import admin from 'firebase-admin'
 
+admin.initializeApp({
+	credential: admin.credential.cert(
+		JSON.parse(Buffer.from(process.env.FIREBASE_CONFIG!, 'base64').toString())
+	),
+	databaseURL: process.env.FIREBASE_DATABASE_URL
+})
+
 import User from './models/User'
 import { lines } from './models/Line'
-
-admin.initializeApp({
-	credential: admin.credential.cert({
-		privateKey: process.env.FIREBASE_PRIVATE_KEY,
-		clientEmail: process.env.FIREBASE_CLIENT_EMAIL
-	}),
-	databaseURL: 'https://draw-place.firebaseio.com'
-})
 
 const port = process.env.PORT ?? 5000
 const app = express()
