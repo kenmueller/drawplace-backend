@@ -1,4 +1,8 @@
-import Coordinate from './Coordinate'
+import admin from 'firebase-admin'
+
+import Coordinate, { getChunkIdForCoordinate } from './Coordinate'
+
+const firestore = admin.firestore()
 
 export default interface Line {
 	from: Coordinate
@@ -6,4 +10,8 @@ export default interface Line {
 	color: string
 }
 
-export const lines: Line[] = []
+export const getChunkIdForLine = ({ from }: Line) =>
+	getChunkIdForCoordinate(from)
+
+export const addLine = async (chunkId: string, line: Line) =>
+	(await firestore.collection(`chunks/${chunkId}/lines`).add(line)).id
