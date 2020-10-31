@@ -3,7 +3,7 @@ import admin from 'firebase-admin'
 import Line from './Line'
 import Coordinate from './Coordinate'
 
-export const CHUNK_DIMENSION = 1000
+export const CHUNK_DIMENSION = 10000
 
 const firestore = admin.firestore()
 
