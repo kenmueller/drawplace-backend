@@ -1,10 +1,18 @@
 import express from 'express'
 import { createServer } from 'http'
 import IO from 'socket.io'
+import admin from 'firebase-admin'
 
 import User from './models/User'
 import { lines } from './models/Line'
-import { messages } from './models/Message'
+
+admin.initializeApp({
+	credential: admin.credential.cert({
+		privateKey: process.env.FIREBASE_PRIVATE_KEY,
+		clientEmail: process.env.FIREBASE_CLIENT_EMAIL
+	}),
+	databaseURL: 'https://draw-place.firebaseio.com'
+})
 
 const port = process.env.PORT ?? 5000
 const app = express()
@@ -22,16 +30,6 @@ app.post('/clear-lines', (req, res) => {
 	
 	lines.splice(0, lines.length)
 	res.send('Cleared lines')
-})
-
-app.post('/clear-messages', (req, res) => {
-	if (req.query.pass !== process.env.PASSWORD) {
-		res.status(403).send('Incorrect password')
-		return
-	}
-	
-	messages.splice(0, messages.length)
-	res.send('Cleared messages')
 })
 
 IO(http).on('connect', io => new User(io))
