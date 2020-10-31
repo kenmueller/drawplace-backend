@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid'
 import UserJson from './UserJson'
 import Coordinate, { getChunkIdForCoordinate } from './Coordinate'
 import { getChunk } from './Chunk'
+import Bounds from './Bounds'
 import Line, { addLine, getChunkIdForLine } from './Line'
 import Message, { UserMessage, JoinMessage, LeaveMessage, addMessage, getMessages } from './Message'
 import generateName from '../utils/generateName'
@@ -57,10 +58,13 @@ export default class User {
 		
 		io.on('cursor', (cursor: Coordinate) => {
 			this.cursor = cursor
-			this.addChunksIfNeeded()
 			
 			for (const user of this.otherUsers)
 				user.emitOtherUsers()
+		})
+		
+		io.on('bounds', (bounds: Bounds) => {
+			
 		})
 		
 		io.on('line', (line: Line) => {
