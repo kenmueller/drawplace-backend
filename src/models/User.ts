@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 
 import UserJson from './UserJson'
 import Coordinate, { getChunkIdForCoordinate, areCoordinatesInOrder } from './Coordinate'
-import { getChunk } from './Chunk'
+import { getChunk, getChunksInBounds } from './Chunk'
 import Bounds from './Bounds'
 import Line, { addLine, getChunkIdForLine } from './Line'
 import Message, { UserMessage, JoinMessage, LeaveMessage, addMessage, getMessages } from './Message'
@@ -66,6 +66,7 @@ export default class User {
 		
 		io.on('bounds', (bounds: Bounds) => {
 			this.bounds = bounds
+			this.addChunksIfNeeded()
 			
 			if (!this.hasEmittedOtherUsers)
 				this.emitOtherUsers()
@@ -135,16 +136,18 @@ export default class User {
 	}
 	
 	private addChunksIfNeeded = async () => {
-		if (!this.cursor)
+		if (!this.bounds)
 			return
 		
-		const chunkId = getChunkIdForCoordinate(this.cursor)
-		
-		if (this.chunks.has(chunkId))
-			return // Already loaded chunk
-		
-		this.chunks.add(chunkId)
-		this.io.emit('chunk', await getChunk(this.cursor))
+		await Promise.all(getChunksInBounds(this.bounds).map(async coordinate => {
+			const chunkId = getChunkIdForCoordinate(coordinate)
+			
+			if (this.chunks.has(chunkId))
+				return // Already loaded chunk
+			
+			this.chunks.add(chunkId)
+			this.io.emit('chunk', await getChunk(coordinate))
+		}))
 	}
 	
 	private emitLine = (chunkId: string, line: Line) => {
