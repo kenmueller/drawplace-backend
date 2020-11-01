@@ -23,6 +23,10 @@ export default class User {
 	
 	constructor(private io: Socket) {
 		this.otherUsers = new Set(users)
+		
+		for (const user of users)
+			user.otherUsers.add(this)
+		
 		users.add(this)
 		
 		this.emitName()
