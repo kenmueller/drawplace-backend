@@ -49,6 +49,9 @@ export const getChunksInBounds = (bounds: Bounds) => {
 	}
 }
 
+export const getChunkId = ({ x, y }: Coordinate) =>
+	`${Math.floor(x / CHUNK_DIMENSION)}x${Math.floor(y / CHUNK_DIMENSION)}`
+
 export const getChunk = async ({ x, y }: Coordinate): Promise<Chunk> => {
 	x = Math.floor(x / CHUNK_DIMENSION)
 	y = Math.floor(y / CHUNK_DIMENSION)
