@@ -13,8 +13,17 @@ admin.initializeApp({
 import User from './models/User'
 
 const port = process.env.PORT ?? 5000
+const origin = process.env.NODE_ENV === 'production'
+	? 'https://draw.place'
+	: 'http://localhost:3000'
+
 const app = express()
 const http = createServer(app)
+
+app.use((_req, res, next) => {
+	res.header('Access-Control-Allow-Origin', origin)
+	next()
+})
 
 app.get('/', (_req, res) => {
 	res.redirect(301, 'https://draw.place')
