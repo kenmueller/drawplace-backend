@@ -1,5 +1,4 @@
 import { Socket } from 'socket.io'
-import { v4 as uuid } from 'uuid'
 
 import UserJson from './UserJson'
 import Coordinate, { getChunkIdForCoordinate, areCoordinatesInOrder } from './Coordinate'
@@ -12,7 +11,7 @@ import generateName from '../utils/generateName'
 const users = new Set<User>()
 
 export default class User {
-	private id: string = uuid()
+	private id: string
 	private cursor?: Coordinate
 	private name: string = generateName()
 	private color: string = '#000000'
@@ -22,6 +21,7 @@ export default class User {
 	private hasEmittedOtherUsers: boolean = false
 	
 	constructor(private io: Socket) {
+		this.id = io.id
 		this.otherUsers = new Set(users)
 		
 		for (const user of users)
