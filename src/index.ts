@@ -1,6 +1,6 @@
 import express from 'express'
 import { createServer } from 'http'
-import IO from 'socket.io'
+import { Server, Socket } from 'socket.io'
 import admin from 'firebase-admin'
 
 admin.initializeApp({
@@ -58,7 +58,8 @@ app.post('/clear/:x1/:y1/:x2/:y2', async ({
 	res.send(`Cleared lines between ${bounds.lower.x}/${bounds.lower.y} and ${bounds.upper.x}/${bounds.upper.y}`)
 })
 
-IO(http).on('connect', io => new User(io))
+new Server(http, { cors: { origin } })
+	.on('connect', (io: Socket) => new User(io))
 
 http.listen(port, () => {
 	console.log(`Listening on http://localhost:${port}`)
