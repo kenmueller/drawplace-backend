@@ -29,7 +29,7 @@ app.use((_req, res, next) => {
 })
 
 app.get('/', (_req, res) => {
-	res.redirect(301, 'https://draw.place')
+	res.redirect(301, origin)
 })
 
 app.post('/clear/:x1/:y1/:x2/:y2', async ({
