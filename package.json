@@ -11,9 +11,7 @@
 		"lodash": "^4.17.20",
 		"socket.io": "^3.0.1",
 		"unique-names-generator": "^4.3.1",
-		"ts-node": "^9.0.0"
-	},
-	"devDependencies": {
+		"ts-node": "^9.0.0",
 		"@types/express": "^4.17.9",
 		"@types/lodash": "^4.14.165",
 		"nodemon": "^2.0.6",
